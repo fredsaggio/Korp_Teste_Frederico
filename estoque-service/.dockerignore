@@ -1,0 +1,7 @@
+.env
+.env.*
+.git
+.gitignore
+estoque-service
+tmp/
+coverage.out

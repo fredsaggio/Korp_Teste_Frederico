@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	connStr := os.Getenv("ESTOQUE_DATABASE_URL")
 	ctx := context.Background()
+	connStr := os.Getenv("ESTOQUE_DATABASE_URL")
 	dbpool, err := pgxpool.New(ctx, connStr)
 
 	if err != nil {
