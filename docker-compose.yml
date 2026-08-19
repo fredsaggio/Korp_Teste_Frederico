@@ -1,0 +1,75 @@
+services:
+
+  postgres-estoque:
+    image: postgres:16
+    container_name: postgres-estoque
+    environment:
+      POSTGRES_USER: ${POSTGRES_ESTOQUE_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_ESTOQUE_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_ESTOQUE_DB}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_estoque_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_ESTOQUE_USER} -d ${POSTGRES_ESTOQUE_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres-faturamento:
+    image: postgres:16
+    container_name: postgres-faturamento
+    environment:
+      POSTGRES_USER: ${POSTGRES_FATURAMENTO_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_FATURAMENTO_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_FATURAMENTO_DB}
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_faturamento_data:/var/lib/postgresql/data
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "pg_isready -U ${POSTGRES_FATURAMENTO_USER} -d ${POSTGRES_FATURAMENTO_DB}"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+
+  estoque-service:
+    build: ./estoque-service
+    container_name: estoque-service
+    ports:
+      - "5001:5001"
+    environment:
+      ESTOQUE_DATABASE_URL: postgres://${POSTGRES_ESTOQUE_USER}:${POSTGRES_ESTOQUE_PASSWORD}@postgres-estoque:5432/${POSTGRES_ESTOQUE_DB}?sslmode=disable
+    depends_on:
+      postgres-estoque:
+        condition: service_healthy
+
+  faturamento-service:
+    build: ./faturamento-service
+    container_name: faturamento-service
+    ports:
+      - "5002:5002"
+    environment:
+      ESTOQUE_SERVICE_URL: http://estoque-service:5001
+      FATURAMENTO_DATABASE_URL: postgres://${POSTGRES_FATURAMENTO_USER}:${POSTGRES_FATURAMENTO_PASSWORD}@postgres-faturamento:5432/${POSTGRES_FATURAMENTO_DB}?sslmode=disable
+
+    depends_on:
+      postgres-faturamento:
+        condition: service_healthy
+      estoque-service:
+        condition: service_started
+
+volumes:
+  postgres_estoque_data:
+  postgres_faturamento_data:
+      
