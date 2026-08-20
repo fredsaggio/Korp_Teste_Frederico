@@ -21,3 +21,7 @@ migration/estoque/down:
 .PHONY: migration/estoque/status
 migration/estoque/status:
 	@goose -dir $(ESTOQUE_MIGRATIONS_DIR) postgres "$(ESTOQUE_LOCAL_DATABASE_URL)" status
+
+.PHONY: test/estoque/integration
+test/estoque/integration:
+	@cd estoque-service && ESTOQUE_TEST_DATABASE_URL="$(ESTOQUE_LOCAL_DATABASE_URL)" go test -count=1 ./internal/products
