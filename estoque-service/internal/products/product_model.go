@@ -6,7 +6,10 @@ import (
 	"time"
 )
 
-var ErrInvalidInput = errors.New("invalid product input")
+var (
+	ErrInvalidInput      = errors.New("invalid product input")
+	ErrCodeAlreadyExists = errors.New("product code already exists")
+)
 
 type Product struct {
 	ID          int64     `json:"id"`
