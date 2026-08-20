@@ -3,21 +3,11 @@ package server
 import (
 	"net/http"
 	"time"
-
-	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-type Server struct {
-	db *pgxpool.Pool
-}
-
-func New(db *pgxpool.Pool) *http.Server {
-	server := &Server{
-		db: db,
-	}
-
+func New() *http.Server {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /health", server.health)
+	mux.HandleFunc("GET /health", health)
 
 	return &http.Server{
 		Addr:              ":5001",
@@ -26,7 +16,7 @@ func New(db *pgxpool.Pool) *http.Server {
 	}
 }
 
-func (s *Server) health(w http.ResponseWriter, r *http.Request) {
+func health(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(`{"status":"ok"}`))
