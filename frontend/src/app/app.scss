@@ -1,0 +1,21 @@
+.app-toolbar {
+  gap: 0.75rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+}
+
+.brand-mark {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 0.5rem;
+  background: var(--mat-sys-primary);
+  color: var(--mat-sys-on-primary);
+  font: var(--mat-sys-label-large);
+  place-items: center;
+}
+
+.app-content {
+  width: min(100% - 2rem, 75rem);
+  margin-inline: auto;
+  padding-block: 2rem;
+}
