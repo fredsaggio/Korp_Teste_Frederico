@@ -42,6 +42,31 @@ services:
       timeout: 5s
       retries: 10
 
+  estoque-migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    image: korp-migrations:local
+    container_name: estoque-migrations
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_ESTOQUE_USER}:${POSTGRES_ESTOQUE_PASSWORD}@postgres-estoque:5432/${POSTGRES_ESTOQUE_DB}?sslmode=disable
+      MIGRATIONS_DIR: /migrations/estoque
+    depends_on:
+      postgres-estoque:
+        condition: service_healthy
+
+  faturamento-migrations:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrations
+    image: korp-migrations:local
+    container_name: faturamento-migrations
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_FATURAMENTO_USER}:${POSTGRES_FATURAMENTO_PASSWORD}@postgres-faturamento:5432/${POSTGRES_FATURAMENTO_DB}?sslmode=disable
+      MIGRATIONS_DIR: /migrations/faturamento
+    depends_on:
+      postgres-faturamento:
+        condition: service_healthy
 
   estoque-service:
     build: ./estoque-service
@@ -51,8 +76,13 @@ services:
     environment:
       ESTOQUE_DATABASE_URL: postgres://${POSTGRES_ESTOQUE_USER}:${POSTGRES_ESTOQUE_PASSWORD}@postgres-estoque:5432/${POSTGRES_ESTOQUE_DB}?sslmode=disable
     depends_on:
-      postgres-estoque:
-        condition: service_healthy
+      estoque-migrations:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:5001/health"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   faturamento-service:
     build: ./faturamento-service
@@ -64,10 +94,10 @@ services:
       FATURAMENTO_DATABASE_URL: postgres://${POSTGRES_FATURAMENTO_USER}:${POSTGRES_FATURAMENTO_PASSWORD}@postgres-faturamento:5432/${POSTGRES_FATURAMENTO_DB}?sslmode=disable
 
     depends_on:
-      postgres-faturamento:
-        condition: service_healthy
+      faturamento-migrations:
+        condition: service_completed_successfully
       estoque-service:
-        condition: service_started
+        condition: service_healthy
 
 volumes:
   postgres_estoque_data:

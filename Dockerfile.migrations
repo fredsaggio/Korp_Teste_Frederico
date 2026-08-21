@@ -1,0 +1,28 @@
+# syntax=docker/dockerfile:1
+
+ARG GO_VERSION=1.26.0
+ARG ALPINE_VERSION=3.22
+ARG GOOSE_VERSION=v3.27.1
+
+FROM golang:${GO_VERSION}-alpine AS build
+
+ARG GOOSE_VERSION
+
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 GOBIN=/out go install github.com/pressly/goose/v3/cmd/goose@${GOOSE_VERSION}
+
+FROM alpine:${ALPINE_VERSION}
+
+RUN addgroup -S app && adduser -S app -G app
+
+COPY --from=build /out/goose /usr/local/bin/goose
+COPY estoque-service/internal/db/migrations /migrations/estoque
+COPY faturamento-service/internal/db/migrations /migrations/faturamento
+COPY scripts/migrate.sh /usr/local/bin/migrate
+
+RUN chmod +x /usr/local/bin/migrate
+
+USER app
+
+ENTRYPOINT ["/usr/local/bin/migrate"]
