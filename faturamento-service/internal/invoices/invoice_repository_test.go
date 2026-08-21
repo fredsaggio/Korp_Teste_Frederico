@@ -74,6 +74,27 @@ func TestInvoiceStoreIntegration(t *testing.T) {
 		t.Fatalf("GetByNumber() items = %#v, want %#v", got.Items, firstInput.Items)
 	}
 
+	closedAt, err := store.Close(ctx, first.Number)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if closedAt.IsZero() {
+		t.Fatal("Close() returned zero closed timestamp")
+	}
+	closed, err := store.GetByNumber(ctx, first.Number)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if closed.Status != StatusClosed || closed.ClosedAt == nil || !closed.ClosedAt.Equal(closedAt) {
+		t.Fatalf("closed invoice = %#v", closed)
+	}
+	if _, err := store.Close(ctx, first.Number); !errors.Is(err, ErrInvoiceNotOpen) {
+		t.Fatalf("second Close() error = %v, want ErrInvoiceNotOpen", err)
+	}
+	if _, err := store.Close(ctx, second.Number+999999); !errors.Is(err, ErrInvoiceNotFound) {
+		t.Fatalf("missing Close() error = %v, want ErrInvoiceNotFound", err)
+	}
+
 	listed, err := store.List(ctx)
 	if err != nil {
 		t.Fatal(err)

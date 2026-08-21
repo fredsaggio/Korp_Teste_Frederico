@@ -2,7 +2,9 @@ package invoices
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"time"
 
 	"korp/faturamento-service/internal/db"
 
@@ -113,6 +115,36 @@ func (s *invoiceStore) GetByNumber(ctx context.Context, number int64) (*Invoice,
 		return nil, ErrInvoiceNotFound
 	}
 	return &invoices[0], nil
+}
+
+func (s *invoiceStore) Close(ctx context.Context, number int64) (time.Time, error) {
+	const update = `
+		UPDATE invoices
+		SET status = 'CLOSED',
+			updated_at = NOW(),
+			closed_at = NOW()
+		WHERE id = $1 AND status = 'OPEN'
+		RETURNING closed_at
+	`
+
+	var closedAt time.Time
+	if err := s.db.QueryRow(ctx, update, number).Scan(&closedAt); err != nil {
+		if !errors.Is(err, pgx.ErrNoRows) {
+			return time.Time{}, fmt.Errorf("close invoice: %w", err)
+		}
+
+		const findStatus = `SELECT status FROM invoices WHERE id = $1`
+		var status Status
+		if err := s.db.QueryRow(ctx, findStatus, number).Scan(&status); err != nil {
+			if errors.Is(err, pgx.ErrNoRows) {
+				return time.Time{}, ErrInvoiceNotFound
+			}
+			return time.Time{}, fmt.Errorf("find invoice status: %w", err)
+		}
+		return time.Time{}, ErrInvoiceNotOpen
+	}
+
+	return closedAt, nil
 }
 
 func scanInvoices(rows pgx.Rows) ([]Invoice, error) {

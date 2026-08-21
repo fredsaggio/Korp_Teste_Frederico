@@ -9,6 +9,7 @@ import (
 var (
 	ErrInvalidInput    = errors.New("invalid invoice input")
 	ErrInvoiceNotFound = errors.New("invoice not found")
+	ErrInvoiceNotOpen  = errors.New("invoice is not open")
 )
 
 type Status string
@@ -40,6 +41,11 @@ type InvoiceStore interface {
 	Create(ctx context.Context, input CreateInput) (*Invoice, error)
 	List(ctx context.Context) ([]Invoice, error)
 	GetByNumber(ctx context.Context, number int64) (*Invoice, error)
+	Close(ctx context.Context, number int64) (time.Time, error)
+}
+
+type InvoiceClosingService interface {
+	Close(ctx context.Context, number int64) (*Invoice, error)
 }
 
 type InvoiceService interface {

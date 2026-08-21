@@ -5,12 +5,14 @@ import (
 	"errors"
 	"reflect"
 	"testing"
+	"time"
 )
 
 type invoiceStoreStub struct {
 	create      func(context.Context, CreateInput) (*Invoice, error)
 	list        func(context.Context) ([]Invoice, error)
 	getByNumber func(context.Context, int64) (*Invoice, error)
+	close       func(context.Context, int64) (time.Time, error)
 }
 
 func (s invoiceStoreStub) Create(ctx context.Context, input CreateInput) (*Invoice, error) {
@@ -23,6 +25,10 @@ func (s invoiceStoreStub) List(ctx context.Context) ([]Invoice, error) {
 
 func (s invoiceStoreStub) GetByNumber(ctx context.Context, number int64) (*Invoice, error) {
 	return s.getByNumber(ctx, number)
+}
+
+func (s invoiceStoreStub) Close(ctx context.Context, number int64) (time.Time, error) {
+	return s.close(ctx, number)
 }
 
 func TestInvoiceServiceCreateSortsItems(t *testing.T) {
