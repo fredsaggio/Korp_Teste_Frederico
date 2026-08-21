@@ -30,7 +30,8 @@ func run() error {
 	}
 	defer pool.Close()
 
-	httpServer := server.New()
+	handlers := buildHandlers(pool)
+	httpServer := server.New(handlers)
 
 	log.Print("Faturamento service running on port 5002")
 	if err := httpServer.ListenAndServe(); err != nil {
