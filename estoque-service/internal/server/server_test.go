@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"korp/estoque-service/internal/products"
+	"korp/estoque-service/internal/stock"
 )
 
 type productServiceStub struct{}
@@ -25,9 +26,34 @@ func (productServiceStub) List(context.Context) ([]products.Product, error) {
 	return []products.Product{{ID: 1, Code: "PROD-001", Description: "Product", Balance: 10}}, nil
 }
 
+type debitServiceStub struct{}
+
+func (debitServiceStub) Debit(_ context.Context, input stock.DebitInput) (*stock.DebitResult, error) {
+	return &stock.DebitResult{Reference: input.Reference}, nil
+}
+
 func newTestHandler() http.Handler {
 	productHandler := products.NewProductHandler(productServiceStub{})
-	return New(Handlers{ProductHandler: productHandler}).Handler
+	debitHandler := stock.NewDebitHandler(debitServiceStub{})
+	return New(Handlers{
+		ProductHandler: productHandler,
+		DebitHandler:   debitHandler,
+	}).Handler
+}
+
+func TestStockDebitRoute(t *testing.T) {
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/api/v1/stock/debits",
+		strings.NewReader(`{"reference":"INVOICE-001","items":[{"product_id":1,"quantity":2}]}`),
+	)
+	response := httptest.NewRecorder()
+
+	newTestHandler().ServeHTTP(response, request)
+
+	if response.Code != http.StatusCreated {
+		t.Fatalf("status = %d, want %d", response.Code, http.StatusCreated)
+	}
 }
 
 func TestHealthRoute(t *testing.T) {

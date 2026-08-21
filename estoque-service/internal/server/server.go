@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"korp/estoque-service/internal/products"
+	"korp/estoque-service/internal/stock"
 )
 
 type Handlers struct {
 	ProductHandler *products.ProductHandler
+	DebitHandler   *stock.DebitHandler
 }
 
 type Server struct {
@@ -22,6 +24,7 @@ func New(handlers Handlers) *http.Server {
 	mux.HandleFunc("GET /health", health)
 	mux.HandleFunc("POST /api/v1/products", server.handlers.ProductHandler.Create)
 	mux.HandleFunc("GET /api/v1/products", server.handlers.ProductHandler.List)
+	mux.HandleFunc("POST /api/v1/stock/debits", server.handlers.DebitHandler.Debit)
 
 	return &http.Server{
 		Addr:              ":5001",
