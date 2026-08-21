@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	"korp/faturamento-service/internal/db"
 	"korp/faturamento-service/internal/server"
+	"korp/faturamento-service/internal/stock"
 )
 
 func main() {
@@ -23,6 +25,14 @@ func run() error {
 	if connectionString == "" {
 		return errors.New("environment variable FATURAMENTO_DATABASE_URL is required")
 	}
+	stockServiceURL := os.Getenv("ESTOQUE_SERVICE_URL")
+	if stockServiceURL == "" {
+		return errors.New("environment variable ESTOQUE_SERVICE_URL is required")
+	}
+	stockClient, err := stock.NewHTTPClient(stockServiceURL, 3*time.Second)
+	if err != nil {
+		return fmt.Errorf("configure stock service client: %w", err)
+	}
 
 	pool, err := db.Connect(ctx, connectionString)
 	if err != nil {
@@ -30,7 +40,7 @@ func run() error {
 	}
 	defer pool.Close()
 
-	handlers := buildHandlers(pool)
+	handlers := buildHandlers(pool, stockClient)
 	httpServer := server.New(handlers)
 
 	log.Print("Faturamento service running on port 5002")

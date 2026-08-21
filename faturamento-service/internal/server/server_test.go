@@ -12,6 +12,8 @@ import (
 
 type invoiceServiceStub struct{}
 
+type invoiceClosingServiceStub struct{}
+
 func (invoiceServiceStub) Create(_ context.Context, input invoices.CreateInput) (*invoices.Invoice, error) {
 	return &invoices.Invoice{Number: 1, Status: invoices.StatusOpen, Items: input.Items}, nil
 }
@@ -24,9 +26,17 @@ func (invoiceServiceStub) GetByNumber(_ context.Context, number int64) (*invoice
 	return &invoices.Invoice{Number: number, Status: invoices.StatusOpen}, nil
 }
 
+func (invoiceClosingServiceStub) Close(_ context.Context, number int64) (*invoices.Invoice, error) {
+	return &invoices.Invoice{Number: number, Status: invoices.StatusClosed}, nil
+}
+
 func newTestHandler() http.Handler {
 	invoiceHandler := invoices.NewInvoiceHandler(invoiceServiceStub{})
-	return New(Handlers{InvoiceHandler: invoiceHandler}).Handler
+	invoiceClosingHandler := invoices.NewInvoiceClosingHandler(invoiceClosingServiceStub{})
+	return New(Handlers{
+		InvoiceHandler:        invoiceHandler,
+		InvoiceClosingHandler: invoiceClosingHandler,
+	}).Handler
 }
 
 func TestHealthRoute(t *testing.T) {
@@ -68,6 +78,12 @@ func TestInvoiceRoutes(t *testing.T) {
 			name:       "get by number",
 			method:     http.MethodGet,
 			path:       "/api/v1/invoices/1",
+			wantStatus: http.StatusOK,
+		},
+		{
+			name:       "close",
+			method:     http.MethodPost,
+			path:       "/api/v1/invoices/1/close",
 			wantStatus: http.StatusOK,
 		},
 	}

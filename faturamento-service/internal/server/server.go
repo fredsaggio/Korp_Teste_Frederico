@@ -8,7 +8,8 @@ import (
 )
 
 type Handlers struct {
-	InvoiceHandler *invoices.InvoiceHandler
+	InvoiceHandler        *invoices.InvoiceHandler
+	InvoiceClosingHandler *invoices.InvoiceClosingHandler
 }
 
 type Server struct {
@@ -23,6 +24,7 @@ func New(handlers Handlers) *http.Server {
 	mux.HandleFunc("POST /api/v1/invoices", server.handlers.InvoiceHandler.Create)
 	mux.HandleFunc("GET /api/v1/invoices", server.handlers.InvoiceHandler.List)
 	mux.HandleFunc("GET /api/v1/invoices/{number}", server.handlers.InvoiceHandler.GetByNumber)
+	mux.HandleFunc("POST /api/v1/invoices/{number}/close", server.handlers.InvoiceClosingHandler.Close)
 
 	return &http.Server{
 		Addr:              ":5002",
