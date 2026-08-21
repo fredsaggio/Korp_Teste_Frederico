@@ -24,4 +24,4 @@ migration/estoque/status:
 
 .PHONY: test/estoque/integration
 test/estoque/integration:
-	@cd estoque-service && ESTOQUE_TEST_DATABASE_URL="$(ESTOQUE_LOCAL_DATABASE_URL)" go test -count=1 ./internal/products
+	@cd estoque-service && ESTOQUE_TEST_DATABASE_URL="$(ESTOQUE_LOCAL_DATABASE_URL)" go test -count=1 ./internal/products ./internal/stock
