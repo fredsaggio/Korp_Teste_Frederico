@@ -139,7 +139,9 @@ func TestProductHandlerCreateErrors(t *testing.T) {
 				t.Fatalf("service called = %t, want %t", serviceCalled, tt.wantServiceCall)
 			}
 			body := response.Body.Bytes()
-			var got errorResponse
+			var got struct {
+				Error string `json:"error"`
+			}
 			if err := json.Unmarshal(body, &got); err != nil {
 				t.Fatal(err)
 			}
