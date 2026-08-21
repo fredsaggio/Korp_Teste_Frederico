@@ -3,11 +3,25 @@ package server
 import (
 	"net/http"
 	"time"
+
+	"korp/estoque-service/internal/products"
 )
 
-func New() *http.Server {
+type Handlers struct {
+	ProductHandler *products.ProductHandler
+}
+
+type Server struct {
+	handlers Handlers
+}
+
+func New(handlers Handlers) *http.Server {
+	server := &Server{handlers: handlers}
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", health)
+	mux.HandleFunc("POST /api/v1/products", server.handlers.ProductHandler.Create)
+	mux.HandleFunc("GET /api/v1/products", server.handlers.ProductHandler.List)
 
 	return &http.Server{
 		Addr:              ":5001",

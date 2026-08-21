@@ -30,7 +30,8 @@ func run() error {
 	}
 	defer pool.Close()
 
-	httpServer := server.New()
+	handlers := buildHandlers(pool)
+	httpServer := server.New(handlers)
 
 	log.Print("Estoque service running on port 5001")
 
