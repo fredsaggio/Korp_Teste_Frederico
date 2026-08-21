@@ -46,3 +46,7 @@ migration/faturamento/down:
 .PHONY: migration/faturamento/status
 migration/faturamento/status:
 	@goose -dir $(FATURAMENTO_MIGRATIONS_DIR) postgres "$(FATURAMENTO_LOCAL_DATABASE_URL)" status
+
+.PHONY: test/faturamento/integration
+test/faturamento/integration:
+	@cd faturamento-service && FATURAMENTO_TEST_DATABASE_URL="$(FATURAMENTO_LOCAL_DATABASE_URL)" go test -count=1 ./internal/invoices
