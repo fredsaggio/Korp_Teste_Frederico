@@ -18,5 +18,11 @@ export const routes: Routes = [
       import('./features/invoices/invoices').then((component) => component.Invoices),
     title: 'Notas fiscais | Korp Notas Fiscais',
   },
+  {
+    path: 'invoices/:number',
+    loadComponent: () =>
+      import('./features/invoices/invoice-detail').then((component) => component.InvoiceDetail),
+    title: 'Detalhe da nota | Korp Notas Fiscais',
+  },
   { path: '**', redirectTo: '' },
 ];

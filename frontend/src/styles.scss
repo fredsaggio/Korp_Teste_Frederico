@@ -37,3 +37,21 @@ body {
   height: 100%;
 }
 /* You can add global styles to this file, and also import other style files */
+
+@media print {
+  .app-toolbar,
+  .no-print {
+    display: none !important;
+  }
+
+  .app-content {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  body {
+    background: #fff;
+    color: #000;
+  }
+}

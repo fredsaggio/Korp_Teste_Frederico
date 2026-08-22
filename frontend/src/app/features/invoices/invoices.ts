@@ -18,6 +18,7 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatTableModule } from '@angular/material/table';
+import { RouterLink } from '@angular/router';
 import { finalize, forkJoin } from 'rxjs';
 import { Product } from '../products/product';
 import { ProductService } from '../products/product.service';
@@ -41,6 +42,7 @@ type InvoiceItemForm = FormGroup<{
     MatSelectModule,
     MatTableModule,
     ReactiveFormsModule,
+    RouterLink,
   ],
   selector: 'app-invoices',
   styleUrl: './invoices.scss',
@@ -52,7 +54,7 @@ export class Invoices implements OnInit {
   private readonly productService = inject(ProductService);
   private readonly snackBar = inject(MatSnackBar);
 
-  protected readonly displayedColumns = ['number', 'createdAt', 'items', 'status'];
+  protected readonly displayedColumns = ['number', 'createdAt', 'items', 'status', 'actions'];
   protected readonly products = signal<Product[]>([]);
   protected readonly invoices = signal<Invoice[]>([]);
   protected readonly loading = signal(true);

@@ -15,4 +15,12 @@ export class InvoiceService {
   create(input: CreateInvoiceInput): Observable<Invoice> {
     return this.http.post<Invoice>(this.endpoint, input);
   }
+
+  get(number: number): Observable<Invoice> {
+    return this.http.get<Invoice>(`${this.endpoint}/${number}`);
+  }
+
+  close(number: number): Observable<Invoice> {
+    return this.http.post<Invoice>(`${this.endpoint}/${number}/close`, {});
+  }
 }

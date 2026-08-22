@@ -1,0 +1,83 @@
+<div class="screen-actions no-print">
+  <a mat-button routerLink="/invoices">Voltar para notas</a>
+
+  @if (invoice()?.status === 'OPEN') {
+    <button mat-flat-button type="button" [disabled]="processing()" (click)="closeAndPrint()">
+      @if (processing()) {
+        <mat-spinner diameter="20" />
+        <span>Processando...</span>
+      } @else {
+        <span>Fechar e imprimir</span>
+      }
+    </button>
+  }
+</div>
+
+@if (loading()) {
+  <div class="state-message no-print" role="status">
+    <mat-spinner diameter="40" />
+    <span>Carregando nota fiscal...</span>
+  </div>
+} @else if (errorMessage()) {
+  <div class="state-message no-print" role="alert">
+    <p>{{ errorMessage() }}</p>
+    <button mat-button type="button" (click)="loadInvoice()">Tentar novamente</button>
+  </div>
+} @else if (invoice(); as currentInvoice) {
+  <mat-card appearance="outlined" class="invoice-document">
+    <mat-card-content>
+      <header class="invoice-header">
+        <div>
+          <p class="document-label">Nota fiscal</p>
+          <h1>Nº {{ currentInvoice.number }}</h1>
+        </div>
+        <span class="status" [class.status-closed]="currentInvoice.status === 'CLOSED'">
+          {{ currentInvoice.status === 'OPEN' ? 'Aberta' : 'Fechada' }}
+        </span>
+      </header>
+
+      <dl class="invoice-metadata">
+        <div>
+          <dt>Data de emissão</dt>
+          <dd>{{ currentInvoice.created_at | date: 'dd/MM/yyyy HH:mm' }}</dd>
+        </div>
+        <div>
+          <dt>Data de fechamento</dt>
+          <dd>
+            {{
+              currentInvoice.closed_at ? (currentInvoice.closed_at | date: 'dd/MM/yyyy HH:mm') : '—'
+            }}
+          </dd>
+        </div>
+      </dl>
+
+      <section aria-labelledby="items-title">
+        <h2 id="items-title">Produtos</h2>
+        <div class="items-table-wrapper">
+          <table class="items-table">
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>Quantidade</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (item of currentInvoice.items; track item.product_id) {
+                <tr>
+                  <td>{{ productLabel(item.product_id) }}</td>
+                  <td>{{ item.quantity }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      @if (currentInvoice.status === 'CLOSED') {
+        <p class="closed-message no-print" role="status">
+          Esta nota está fechada e não pode ser processada novamente.
+        </p>
+      }
+    </mat-card-content>
+  </mat-card>
+}

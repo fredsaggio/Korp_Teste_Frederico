@@ -45,4 +45,21 @@ describe('InvoiceService', () => {
     expect(request.request.body).toEqual(input);
     request.flush(invoice);
   });
+
+  it('should get an invoice by number', () => {
+    service.get(invoice.number).subscribe((result) => expect(result).toEqual(invoice));
+
+    const request = http.expectOne('/api/v1/invoices/1');
+    expect(request.request.method).toBe('GET');
+    request.flush(invoice);
+  });
+
+  it('should close an invoice', () => {
+    const closedInvoice: Invoice = { ...invoice, status: 'CLOSED' };
+    service.close(invoice.number).subscribe((result) => expect(result).toEqual(closedInvoice));
+
+    const request = http.expectOne('/api/v1/invoices/1/close');
+    expect(request.request.method).toBe('POST');
+    request.flush(closedInvoice);
+  });
 });
