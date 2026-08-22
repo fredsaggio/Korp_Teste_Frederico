@@ -1,0 +1,138 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Faturamento</p>
+    <h1>Notas fiscais</h1>
+    <p>Crie notas com múltiplos produtos e acompanhe o status de cada emissão.</p>
+  </div>
+</header>
+
+@if (loading()) {
+  <div class="state-message" role="status">
+    <mat-spinner diameter="40" />
+    <span>Carregando dados...</span>
+  </div>
+} @else if (errorMessage()) {
+  <div class="state-message" role="alert">
+    <p>{{ errorMessage() }}</p>
+    <button mat-button type="button" (click)="loadData()">Tentar novamente</button>
+  </div>
+} @else {
+  <div class="invoices-layout">
+    <mat-card appearance="outlined">
+      <mat-card-header>
+        <mat-card-title>Nova nota fiscal</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (products().length === 0) {
+          <p class="empty-products" role="status">
+            Cadastre ao menos um produto antes de criar uma nota fiscal.
+          </p>
+        } @else {
+          <form [formGroup]="form" (ngSubmit)="submit()">
+            <div formArrayName="items" class="invoice-items">
+              @for (item of items.controls; track item; let index = $index) {
+                <fieldset [formGroupName]="index">
+                  <legend>Item {{ index + 1 }}</legend>
+
+                  <mat-form-field appearance="outline">
+                    <mat-label>Produto</mat-label>
+                    <mat-select formControlName="productId">
+                      @for (product of products(); track product.id) {
+                        <mat-option
+                          [value]="product.id"
+                          [disabled]="isProductSelected(product.id, index)"
+                        >
+                          {{ product.code }} — {{ product.description }} (saldo:
+                          {{ product.balance }})
+                        </mat-option>
+                      }
+                    </mat-select>
+                    @if (item.controls.productId.touched && item.controls.productId.invalid) {
+                      <mat-error>Selecione um produto.</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <mat-form-field appearance="outline" class="quantity-field">
+                    <mat-label>Quantidade</mat-label>
+                    <input matInput type="number" min="1" formControlName="quantity" />
+                    @if (item.controls.quantity.touched && item.controls.quantity.invalid) {
+                      <mat-error>Informe uma quantidade maior que zero.</mat-error>
+                    }
+                  </mat-form-field>
+
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="items.length === 1"
+                    (click)="removeItem(index)"
+                  >
+                    Remover
+                  </button>
+                </fieldset>
+              }
+            </div>
+
+            <div class="form-actions">
+              <button mat-button type="button" (click)="addItem()">Adicionar produto</button>
+              <button mat-flat-button type="submit" [disabled]="saving()">
+                {{ saving() ? 'Salvando...' : 'Criar nota fiscal' }}
+              </button>
+            </div>
+          </form>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card appearance="outlined" class="invoices-card">
+      <mat-card-header>
+        <mat-card-title>Notas cadastradas</mat-card-title>
+      </mat-card-header>
+
+      <mat-card-content>
+        @if (invoices().length === 0) {
+          <p class="state-message">Nenhuma nota fiscal cadastrada.</p>
+        } @else {
+          <div class="table-container">
+            <table mat-table [dataSource]="invoices()">
+              <ng-container matColumnDef="number">
+                <th mat-header-cell *matHeaderCellDef>Número</th>
+                <td mat-cell *matCellDef="let invoice">#{{ invoice.number }}</td>
+              </ng-container>
+
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef>Emissão</th>
+                <td mat-cell *matCellDef="let invoice">
+                  {{ invoice.created_at | date: 'dd/MM/yyyy HH:mm' }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="items">
+                <th mat-header-cell *matHeaderCellDef>Itens</th>
+                <td mat-cell *matCellDef="let invoice">
+                  <ul class="items-summary">
+                    @for (item of invoice.items; track item.product_id) {
+                      <li>{{ productLabel(item.product_id) }} × {{ item.quantity }}</li>
+                    }
+                  </ul>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th mat-header-cell *matHeaderCellDef>Status</th>
+                <td mat-cell *matCellDef="let invoice">
+                  <span class="status" [class.status-closed]="invoice.status === 'CLOSED'">
+                    {{ statusLabel(invoice.status) }}
+                  </span>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+            </table>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+}

@@ -12,5 +12,11 @@ export const routes: Routes = [
       import('./features/products/products').then((component) => component.Products),
     title: 'Produtos | Korp Notas Fiscais',
   },
+  {
+    path: 'invoices',
+    loadComponent: () =>
+      import('./features/invoices/invoices').then((component) => component.Invoices),
+    title: 'Notas fiscais | Korp Notas Fiscais',
+  },
   { path: '**', redirectTo: '' },
 ];
