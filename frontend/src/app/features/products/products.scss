@@ -1,0 +1,72 @@
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.25rem;
+  color: var(--mat-sys-primary);
+  font: var(--mat-sys-label-large);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+h1 {
+  margin: 0;
+  font: var(--mat-sys-headline-large);
+}
+
+.page-header p:last-child {
+  margin-block: 0.5rem 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.products-layout {
+  display: grid;
+  grid-template-columns: minmax(17rem, 0.75fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 1rem;
+}
+
+form {
+  display: grid;
+  gap: 0.25rem;
+  padding-top: 1rem;
+}
+
+form button {
+  justify-self: start;
+  margin-top: 0.5rem;
+}
+
+.products-card mat-card-content {
+  padding-top: 1rem;
+}
+
+.state-message {
+  display: grid;
+  min-height: 10rem;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+  place-content: center;
+  justify-items: center;
+  gap: 0.75rem;
+}
+
+.state-message p {
+  margin: 0;
+}
+
+.table-container {
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+}
+
+@media (max-width: 52rem) {
+  .products-layout {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,93 @@
+<header class="page-header">
+  <div>
+    <p class="eyebrow">Estoque</p>
+    <h1>Produtos</h1>
+    <p>Cadastre produtos e acompanhe a quantidade disponível.</p>
+  </div>
+</header>
+
+<div class="products-layout">
+  <mat-card appearance="outlined">
+    <mat-card-header>
+      <mat-card-title>Novo produto</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      <form [formGroup]="form" (ngSubmit)="submit()">
+        <mat-form-field appearance="outline">
+          <mat-label>Código</mat-label>
+          <input matInput formControlName="code" autocomplete="off" />
+          @if (form.controls.code.touched && form.controls.code.hasError('required')) {
+            <mat-error>Informe o código.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Descrição</mat-label>
+          <input matInput formControlName="description" autocomplete="off" />
+          @if (
+            form.controls.description.touched && form.controls.description.hasError('required')
+          ) {
+            <mat-error>Informe a descrição.</mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Saldo inicial</mat-label>
+          <input matInput type="number" min="0" formControlName="balance" />
+          @if (form.controls.balance.touched && form.controls.balance.invalid) {
+            <mat-error>O saldo deve ser igual ou maior que zero.</mat-error>
+          }
+        </mat-form-field>
+
+        <button mat-flat-button type="submit" [disabled]="saving()">
+          {{ saving() ? 'Salvando...' : 'Cadastrar produto' }}
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card appearance="outlined" class="products-card">
+    <mat-card-header>
+      <mat-card-title>Produtos cadastrados</mat-card-title>
+    </mat-card-header>
+
+    <mat-card-content>
+      @if (loading()) {
+        <div class="state-message" role="status">
+          <mat-spinner diameter="40" />
+          <span>Carregando produtos...</span>
+        </div>
+      } @else if (errorMessage()) {
+        <div class="state-message" role="alert">
+          <p>{{ errorMessage() }}</p>
+          <button mat-button type="button" (click)="loadProducts()">Tentar novamente</button>
+        </div>
+      } @else if (products().length === 0) {
+        <p class="state-message">Nenhum produto cadastrado.</p>
+      } @else {
+        <div class="table-container">
+          <table mat-table [dataSource]="products()">
+            <ng-container matColumnDef="code">
+              <th mat-header-cell *matHeaderCellDef>Código</th>
+              <td mat-cell *matCellDef="let product">{{ product.code }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="description">
+              <th mat-header-cell *matHeaderCellDef>Descrição</th>
+              <td mat-cell *matCellDef="let product">{{ product.description }}</td>
+            </ng-container>
+
+            <ng-container matColumnDef="balance">
+              <th mat-header-cell *matHeaderCellDef>Saldo</th>
+              <td mat-cell *matCellDef="let product">{{ product.balance }}</td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+          </table>
+        </div>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>
